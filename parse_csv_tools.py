@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
 import csv
-import glob
-import os
-import sys
 import syslog
 
 def get_file_type(mask):
@@ -68,39 +65,9 @@ def get_active_course_schedule(courses, users, enrollment):
                     course_enrollment[course.get('course_id')].append(user.get('user_name')+'['+user.get('user_id')+']')
     return course_enrollment
 
-def print_course_schedule(course_enrollment):
-    for k,v in stuff.iteritems():
+def print_course_schedule(course_enrollment, course_data):
+    for k,v in course_enrollment.iteritems():
         print course_data.get(k).get('course_name')+'['+k+']'
         for item in v:
                 print '\t'+item
     return
-    
-if __name__ == 'main':
-    syslog.openlog('csv_parser', syslog.LOG_PID, syslog.LOG_LOCAL0)
-    if not os.path.exists('csvs'):
-        syslog.syslog(syslog.LOG_WARNING, 'Could not locate directory csvs')
-        sys.exit(1)
-    files = glob.glob('csvs/*.csv')
-    course_data = {} 
-    user_data = {}
-    enrollment_data = [] 
-    for f in files:
-        fh = open(f, 'r')
-        data = load_csv(fh)
-        fh.close()
-        if not data:
-            syslog.syslog(syslog.LOG_ERR, 'Failed to load csv (%s)' % (f))
-            continue 
-        if data.keys()[0] == 'course':
-            course_data.update(data.values()[0])
-        elif data.keys()[0] == 'user':
-            user_data.update(data.values()[0])
-        elif data.keys()[0] == 'enrollment':
-            enrollment_data.extend(data.values()[0])
-
-    course_enrollment = get_active_course_schedule(course_data, user_data, enrollment_data)
-    if not course_enrollment:
-        print "No active courses scheduled"
-        sys.exit(0)
-    print_course_schedule(course_enrollment)
-    sys.exit(0)

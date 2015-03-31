@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import sys
 import parse_csv_tools as pct
